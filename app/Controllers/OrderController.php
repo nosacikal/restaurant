@@ -89,7 +89,6 @@ class OrderController extends BaseController
             }
 
             if ($this->orderModel->transStatus() === FALSE) {
-                $this->orderModel->transRollback();
                 throw new \Exception("Error transaction");
             }
 
@@ -111,25 +110,27 @@ class OrderController extends BaseController
     {
         $order = $this->orderModel->getOrderById($orderId);
 
-        $orderItems = $this->orderItemModel
-            ->select('tr_order_items.quantity, 
-            products.product_name as item_name,
-            products.price')
-            ->join(
-                'ref_products as products',
-                'products.id_product = tr_order_items.id_product'
-            )->where('tr_order_items.id_order', $orderId)
-            ->findAll();
+        if (!$order) {
+            return $this->failNotFound('Order not found');
+        }
 
-        $orderPromotions = $this->orderPromotionModel
-            ->select('tr_order_promotions.quantity, 
-            promotions.promotion_name as item_name,
-            promotions.price')
-            ->join(
-                'ref_promotions as promotions',
-                'promotions.id_promotion = tr_order_promotions.id_promotion'
-            )
-            ->where('id_order', $orderId)->findAll();
+        $orderItems = $this->orderItemModel->getOrderItemsByOrderId($orderId);
+
+        $orderPromotions = $this->orderPromotionModel->getPromotionsByOrderId($orderId);
+
+        if (!$orderItems && !$orderPromotions) {
+            return $this->failNotFound('Order items or promotions not found');
+        }
+
+        $payloadOrderItems = array_map(function ($item) {
+            return [
+                'quantity' => $item['quantity'],
+                'item_name' => $item['product_name'],
+                'variant' => $item['variant'],
+                'price' => $item['price'],
+            ];
+        }, $orderItems);
+
 
         $total = 0;
         foreach ($orderItems as $item) {
@@ -140,11 +141,85 @@ class OrderController extends BaseController
             $total += $promotion['price'];
         }
 
-        return $this->respond([
-            'order' => $order,
-            'items' => $orderItems,
-            'promotions' => $orderPromotions,
-            'total' => number_format($total, 2, '.', ''),
-        ]);
+        $payloadOrderItems = array_map(function ($item) {
+            return [
+                'quantity' => $item['quantity'],
+                'item_name' => $item['product_name'],
+                'variant' => $item['variant'],
+                'price' => $item['price'],
+            ];
+        }, $orderItems);
+
+        $payloadOrderPromotion = array_map(function ($item) {
+            return [
+                'quantity' => $item['quantity'],
+                'item_name' => $item['promotion_name'],
+                'variant' => 'No Variant',
+                'price' => $item['price'],
+            ];
+        }, $orderPromotions);
+
+        $payload = [
+            'message' => 'Order retrieved successfully',
+            'data' => [
+                'order' => $order,
+                'items' => $payloadOrderItems,
+                'promotions' => $payloadOrderPromotion,
+                'total' => number_format($total, 2, '.', ''),
+            ]
+        ];
+
+        return $this->respond($payload, 200);
+    }
+
+    public function printMenu($orderId, $categoryId)
+    {
+        $order = $this->orderModel->getOrderById($orderId);
+
+        if (!$order) {
+            return $this->failNotFound('Order not found');
+        }
+
+        $orderItems = $this->orderItemModel->getOrderItemsByOrderId($orderId);
+
+        $orderPromotions = $this->orderPromotionModel->getPromotionsProductByOrderId($orderId);
+
+        if (!$orderItems && !$orderPromotions) {
+            return $this->failNotFound('Order items or promotions not found');
+        }
+
+        $filterOrderItems = array_values(array_filter($orderItems, function ($item) use ($categoryId) {
+            return $item['id_category'] == $categoryId;
+        }));
+
+        $filterOrderPromotion = array_values(array_filter($orderPromotions, function ($item) use ($categoryId) {
+            return $item['id_category'] == $categoryId;
+        }));
+
+        $payloadOrderItems = array_map(function ($item) {
+            return [
+                'quantity' => $item['quantity'],
+                'item_name' => $item['product_name'],
+            ];
+        }, $filterOrderItems);
+
+        $payloadOrderPromotion = array_map(function ($item) {
+            return [
+                'quantity' => $item['quantity'],
+                'item_name' => $item['product_name'],
+            ];
+        }, $filterOrderPromotion);
+
+        $items = array_merge($payloadOrderItems, $payloadOrderPromotion);
+
+        $payload = [
+            'message' => 'Order retrieved successfully',
+            'data' => [
+                'order' => $order,
+                'items' => $items
+            ]
+        ];
+
+        return $this->respond($payload, 200);
     }
 }
