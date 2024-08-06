@@ -9,7 +9,7 @@ use App\Controllers\ProductController;
 $routes->get('/', 'Home::index');
 
 $routes->group('api', static function (RouteCollection $routes): void {
-  $routes->get('products', 'ProductController::index');
+  $routes->get('menu', 'MenuController::index');
 
   // Order
   $routes->post('orders/create', 'OrderController::create');
