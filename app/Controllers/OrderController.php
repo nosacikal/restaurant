@@ -147,6 +147,7 @@ class OrderController extends BaseController
                 'item_name' => $item['product_name'],
                 'variant' => $item['variant'],
                 'price' => $item['price'],
+                'total_price' => number_format($item['price'] * $item['quantity'], 2, '.', ''),
             ];
         }, $orderItems);
 
@@ -156,6 +157,7 @@ class OrderController extends BaseController
                 'item_name' => $item['promotion_name'],
                 'variant' => 'No Variant',
                 'price' => $item['price'],
+                'total_price' => number_format($item['price'] * $item['quantity'], 2, '.', ''),
             ];
         }, $orderPromotions);
 
