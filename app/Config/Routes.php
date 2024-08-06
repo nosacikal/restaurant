@@ -13,4 +13,5 @@ $routes->group('api', static function (RouteCollection $routes): void {
 
   // Order
   $routes->post('orders/create', 'OrderController::create');
+  $routes->get('orders/print/bill/(:num)', 'OrderController::printBill/$1');
 });

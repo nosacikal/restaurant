@@ -88,7 +88,7 @@ class OrderController extends BaseController
                 }
             }
 
-            if ($this->orderModel->transStatus() === TRUE) {
+            if ($this->orderModel->transStatus() === FALSE) {
                 $this->orderModel->transRollback();
                 throw new \Exception("Error transaction");
             }
@@ -105,5 +105,46 @@ class OrderController extends BaseController
             $this->orderModel->transRollback();
             return $this->fail('An unexpected error occurred: ' . $e->getMessage());
         }
+    }
+
+    public function printBill($orderId)
+    {
+        $order = $this->orderModel->getOrderById($orderId);
+
+        $orderItems = $this->orderItemModel
+            ->select('tr_order_items.quantity, 
+            products.product_name as item_name,
+            products.price')
+            ->join(
+                'ref_products as products',
+                'products.id_product = tr_order_items.id_product'
+            )->where('tr_order_items.id_order', $orderId)
+            ->findAll();
+
+        $orderPromotions = $this->orderPromotionModel
+            ->select('tr_order_promotions.quantity, 
+            promotions.promotion_name as item_name,
+            promotions.price')
+            ->join(
+                'ref_promotions as promotions',
+                'promotions.id_promotion = tr_order_promotions.id_promotion'
+            )
+            ->where('id_order', $orderId)->findAll();
+
+        $total = 0;
+        foreach ($orderItems as $item) {
+            // $product = $this->productModel->find($item['id_product']);
+            $total += $item['price'] * $item['quantity'];
+        }
+        foreach ($orderPromotions as $promotion) {
+            $total += $promotion['price'];
+        }
+
+        return $this->respond([
+            'order' => $order,
+            'items' => $orderItems,
+            'promotions' => $orderPromotions,
+            'total' => number_format($total, 2, '.', ''),
+        ]);
     }
 }
