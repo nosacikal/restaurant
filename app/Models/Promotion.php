@@ -7,6 +7,10 @@ use CodeIgniter\Model;
 class Promotion extends Model
 {
     protected $db;
+    protected $table            = 'ref_promotions as promotions';
+    protected $primaryKey       = 'id_promotion';
+    protected $useAutoIncrement = true;
+    protected $allowedFields    = [];
 
     public function getAllPromotion()
     {
@@ -26,5 +30,19 @@ class Promotion extends Model
 
         $query = $builder->get();
         return $query->getResult();
+    }
+
+    public function getPromotionsProductByIdPromotion($idPromotion)
+    {
+        return $this
+            ->join(
+                'ref_promotion_items as promotion_items',
+                'promotion_items.id_promotion = promotions.id_promotion'
+            )
+            ->join(
+                'ref_products as products',
+                'products.id_product = promotion_items.id_product'
+            )
+            ->whereIn('promotions.id_promotion', $idPromotion)->findAll();
     }
 }

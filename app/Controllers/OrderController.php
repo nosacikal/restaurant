@@ -88,6 +88,48 @@ class OrderController extends BaseController
                 }
             }
 
+            $products = $this->productCollection($data['products']);
+
+            $dataItemsDapur = array_values(array_filter($products, function ($item) {
+                return $item['id_category'] == 1;
+            }));
+
+            $dataItemsBar = array_values(array_filter($products, function ($item) {
+                return $item['id_category'] == 2;
+            }));
+
+            $promotions = $this->promotionCollection($data['promotions']);
+
+            $dataPromotionDapur = array_values(array_filter($promotions, function ($item) {
+                return $item['id_category'] == 1;
+            }));
+
+            $dataPromotionBar = array_values(array_filter($promotions, function ($item) {
+                return $item['id_category'] == 2;
+            }));
+
+            $mergeOrderDapur = array_merge($dataItemsDapur, $dataPromotionDapur);
+            $mergeOrderBar = array_merge($dataItemsBar, $dataPromotionBar);
+
+            $payloadOrderDapur = array_map(function ($item) {
+                return [
+                    'item_name' => $item['item_name'],
+                    'variant' => $item['variant'],
+                    'quantity' => $item['quantity'],
+                ];
+            }, $mergeOrderDapur);
+
+            $payloadOrderBar = array_map(function ($item) {
+                return [
+                    'quantity' => $item['quantity'],
+                    'item_name' => $item['item_name'],
+                    'variant' => $item['variant'],
+                ];
+            }, $mergeOrderBar);
+
+            $billResponse = $this->printBill($orderId);
+            $billData = $billResponse->getBody(); // Ambil body dari respons printBill
+
             if ($this->orderModel->transStatus() === FALSE) {
                 throw new \Exception("Error transaction");
             }
@@ -95,7 +137,10 @@ class OrderController extends BaseController
             $this->orderModel->transCommit();
             return $this->respondCreated([
                 'message' => 'Order created successfully',
-                'data' => $orderId
+                'order_number' => $orderId,
+                'printer_kasir' => json_decode($billData, true),
+                'printer_dapur' => $payloadOrderDapur,
+                'printer_bar' => $payloadOrderBar
             ]);
         } catch (\DatabaseException $e) {
             $this->orderModel->transRollback();
@@ -223,5 +268,53 @@ class OrderController extends BaseController
         ];
 
         return $this->respond($payload, 200);
+    }
+
+    private function productCollection($products)
+    {
+        $idProducts = array_column($products, 'id_product');
+        $dataProduct = $this->productModel->whereIn('id_product', $idProducts)->findAll();
+
+        $resultProduct = [];
+        foreach ($products as $apiProduct) {
+            foreach ($dataProduct as $dbProduct) {
+                if ($apiProduct['id_product'] == $dbProduct['id_product']) {
+                    // Gabungkan data dari API dan database
+                    $resultProduct[] = [
+                        "id_product" => $dbProduct['id_product'],
+                        "quantity" => $apiProduct['quantity'],
+                        "id_category" => $dbProduct['id_category'],
+                        "item_name" => $dbProduct['product_name'],
+                        "variant" => $dbProduct['variant']
+                    ];
+                }
+            }
+        }
+
+        return $resultProduct;
+    }
+
+    private function promotionCollection($promotions)
+    {
+        $idPromotion = array_column($promotions, 'id_promotion');
+        $dataPromotion = $this->promotionModel->getPromotionsProductByIdPromotion($idPromotion);
+
+        $resultPromotion = [];
+        foreach ($promotions as $apiProduct) {
+            foreach ($dataPromotion as $dbProduct) {
+                if ($apiProduct['id_promotion'] == $dbProduct['id_promotion']) {
+                    // Gabungkan data dari API dan database
+                    $resultPromotion[] = [
+                        "id_product" => $dbProduct['id_product'],
+                        "quantity" => $apiProduct['quantity'],
+                        "id_category" => $dbProduct['id_category'],
+                        "item_name" => $dbProduct['product_name'],
+                        "variant" => $dbProduct['variant'] ?? 'No Variant'
+                    ];
+                }
+            }
+        }
+
+        return $resultPromotion;
     }
 }

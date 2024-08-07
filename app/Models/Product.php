@@ -8,6 +8,10 @@ class Product extends Model
 {
 
     protected $db;
+    protected $table            = 'ref_products';
+    protected $primaryKey       = 'id_product';
+    protected $useAutoIncrement = true;
+    protected $allowedFields    = [];
 
     public function getAllProduct()
     {
