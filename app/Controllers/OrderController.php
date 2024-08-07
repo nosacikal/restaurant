@@ -38,55 +38,10 @@ class OrderController extends BaseController
 
             $data = $this->request->getJSON(true);
 
-            $orderData = [
-                'id_table' => $data['id_table'],
-                'order_date' => date('Y-m-d H:i:s'),
-            ];
+            $orderId = $this->createOrder($data);
 
-            $orderId = $this->orderModel->insert($orderData);
-
-            if ($orderId < 1) {
-                throw new \DatabaseException('Failed to save order');
-            }
-
-            // Insert order items
-            if (!empty($data['products'])) {
-
-                $products = $data['products'];
-
-                $payloadOrderItems = array_map(function ($product) use ($orderId) {
-                    return [
-                        'id_order' => $orderId,
-                        'id_product' => $product['id_product'],
-                        'quantity' => $product['quantity'],
-                    ];
-                }, $products);
-
-                $orderItem = $this->orderItemModel->insertBatch($payloadOrderItems);
-
-                if ($orderItem < 1) {
-                    throw new \DatabaseException("Failed to create order items");
-                }
-            }
-
-            // Insert order promotions
-            if (!empty($data['promotions'])) {
-                $promotions = $data['promotions'];
-
-                $payloadOrderPromotion = array_map(function ($product) use ($orderId) {
-                    return [
-                        'id_order' => $orderId,
-                        'id_promotion' => $product['id_promotion'],
-                        'quantity' => $product['quantity'],
-                    ];
-                }, $promotions);
-
-                $orderPromotion = $this->orderPromotionModel->insertBatch($payloadOrderPromotion);
-
-                if ($orderPromotion < 1) {
-                    throw new \DatabaseException("Failed to create order promotions");
-                }
-            }
+            $this->createOrderItems($orderId, $data['products']);
+            $this->createOrderPromotions($orderId, $data['promotions']);
 
             $products = $this->productCollection($data['products']);
 
@@ -148,6 +103,64 @@ class OrderController extends BaseController
         } catch (\Exception $e) {
             $this->orderModel->transRollback();
             return $this->fail('An unexpected error occurred: ' . $e->getMessage());
+        }
+    }
+
+    private function createOrder($data)
+    {
+        $orderData = [
+            'id_table' => $data['id_table'],
+            'order_date' => date('Y-m-d H:i:s'),
+        ];
+
+        $orderId = $this->orderModel->insert($orderData);
+
+        if ($orderId < 1) {
+            throw new \DatabaseException('Failed to save order');
+        }
+
+        return $orderId;
+    }
+
+    private function createOrderItems($orderId, $products)
+    {
+        // Insert order items
+        if (!empty($products)) {
+
+            $payloadOrderItems = array_map(function ($product) use ($orderId) {
+                return [
+                    'id_order' => $orderId,
+                    'id_product' => $product['id_product'],
+                    'quantity' => $product['quantity'],
+                ];
+            }, $products);
+
+            $orderItem = $this->orderItemModel->insertBatch($payloadOrderItems);
+
+            if ($orderItem < 1) {
+                throw new \DatabaseException("Failed to create order items");
+            }
+        }
+    }
+
+    private function createOrderPromotions($orderId, $promotions)
+    {
+        // Insert order promotions
+        if (!empty($promotions)) {
+
+            $payloadOrderPromotion = array_map(function ($product) use ($orderId) {
+                return [
+                    'id_order' => $orderId,
+                    'id_promotion' => $product['id_promotion'],
+                    'quantity' => $product['quantity'],
+                ];
+            }, $promotions);
+
+            $orderPromotion = $this->orderPromotionModel->insertBatch($payloadOrderPromotion);
+
+            if ($orderPromotion < 1) {
+                throw new \DatabaseException("Failed to create order promotions");
+            }
         }
     }
 
