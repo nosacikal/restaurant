@@ -46,21 +46,21 @@ class OrderController extends BaseController
             $products = $this->productCollection($data['products']);
 
             $dataItemsDapur = array_values(array_filter($products, function ($item) {
-                return $item['id_category'] == 1;
+                return $item['id_category'] == 2;
             }));
 
             $dataItemsBar = array_values(array_filter($products, function ($item) {
-                return $item['id_category'] == 2;
+                return $item['id_category'] == 1;
             }));
 
             $promotions = $this->promotionCollection($data['promotions']);
 
             $dataPromotionDapur = array_values(array_filter($promotions, function ($item) {
-                return $item['id_category'] == 1;
+                return $item['id_category'] == 2;
             }));
 
             $dataPromotionBar = array_values(array_filter($promotions, function ($item) {
-                return $item['id_category'] == 2;
+                return $item['id_category'] == 1;
             }));
 
             $mergeOrderDapur = array_merge($dataItemsDapur, $dataPromotionDapur);
