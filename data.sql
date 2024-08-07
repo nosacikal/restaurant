@@ -11,7 +11,7 @@
  Target Server Version : 80030 (8.0.30)
  File Encoding         : 65001
 
- Date: 06/08/2024 15:14:02
+ Date: 07/08/2024 09:38:28
 */
 
 SET NAMES utf8mb4;
@@ -144,39 +144,15 @@ CREATE TABLE `tr_order_items`  (
   `quantity` int NOT NULL,
   PRIMARY KEY (`id_order_items`) USING BTREE,
   UNIQUE INDEX `id_order_items`(`id_order_items` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tr_order_items
 -- ----------------------------
-INSERT INTO `tr_order_items` VALUES (1, 1, 1, 1);
-INSERT INTO `tr_order_items` VALUES (2, 1, 6, 1);
-INSERT INTO `tr_order_items` VALUES (3, 1, 3, 1);
-INSERT INTO `tr_order_items` VALUES (4, 1, 8, 1);
-INSERT INTO `tr_order_items` VALUES (5, 6, 1, 1);
-INSERT INTO `tr_order_items` VALUES (6, 6, 6, 1);
-INSERT INTO `tr_order_items` VALUES (7, 6, 3, 1);
-INSERT INTO `tr_order_items` VALUES (8, 6, 8, 1);
-INSERT INTO `tr_order_items` VALUES (9, 7, 1, 1);
-INSERT INTO `tr_order_items` VALUES (10, 7, 6, 1);
-INSERT INTO `tr_order_items` VALUES (11, 7, 3, 1);
-INSERT INTO `tr_order_items` VALUES (12, 7, 8, 1);
-INSERT INTO `tr_order_items` VALUES (13, 8, 1, 1);
-INSERT INTO `tr_order_items` VALUES (14, 8, 6, 1);
-INSERT INTO `tr_order_items` VALUES (15, 8, 3, 1);
-INSERT INTO `tr_order_items` VALUES (16, 8, 8, 1);
-INSERT INTO `tr_order_items` VALUES (41, 15, 1, 1);
-INSERT INTO `tr_order_items` VALUES (42, 15, 6, 1);
-INSERT INTO `tr_order_items` VALUES (43, 15, 3, 1);
-INSERT INTO `tr_order_items` VALUES (44, 15, 8, 1);
-INSERT INTO `tr_order_items` VALUES (45, 16, 1, 1);
-INSERT INTO `tr_order_items` VALUES (46, 16, 6, 1);
-INSERT INTO `tr_order_items` VALUES (47, 16, 3, 1);
-INSERT INTO `tr_order_items` VALUES (48, 16, 8, 1);
-INSERT INTO `tr_order_items` VALUES (49, 17, 1, 2);
-INSERT INTO `tr_order_items` VALUES (50, 17, 6, 10);
-INSERT INTO `tr_order_items` VALUES (51, 17, 3, 11);
-INSERT INTO `tr_order_items` VALUES (52, 17, 8, 12);
+INSERT INTO `tr_order_items` VALUES (1, 1, 1, 2);
+INSERT INTO `tr_order_items` VALUES (2, 1, 6, 10);
+INSERT INTO `tr_order_items` VALUES (3, 1, 3, 11);
+INSERT INTO `tr_order_items` VALUES (4, 1, 8, 12);
 
 -- ----------------------------
 -- Table structure for tr_order_promotions
@@ -189,17 +165,12 @@ CREATE TABLE `tr_order_promotions`  (
   `quantity` int NOT NULL,
   PRIMARY KEY (`id_order_promotion`) USING BTREE,
   UNIQUE INDEX `id_order_promotion`(`id_order_promotion` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tr_order_promotions
 -- ----------------------------
-INSERT INTO `tr_order_promotions` VALUES (1, 1, 1, 2);
-INSERT INTO `tr_order_promotions` VALUES (2, 6, 1, 2);
-INSERT INTO `tr_order_promotions` VALUES (3, 7, 1, 2);
-INSERT INTO `tr_order_promotions` VALUES (4, 8, 1, 2);
-INSERT INTO `tr_order_promotions` VALUES (9, 15, 1, 2);
-INSERT INTO `tr_order_promotions` VALUES (10, 17, 1, 3);
+INSERT INTO `tr_order_promotions` VALUES (1, 1, 1, 3);
 
 -- ----------------------------
 -- Table structure for tr_orders
@@ -211,21 +182,11 @@ CREATE TABLE `tr_orders`  (
   `order_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_order`) USING BTREE,
   UNIQUE INDEX `id_order`(`id_order` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tr_orders
 -- ----------------------------
-INSERT INTO `tr_orders` VALUES (1, 1, '2024-08-06 09:59:02');
-INSERT INTO `tr_orders` VALUES (2, 1, '2024-08-06 04:46:13');
-INSERT INTO `tr_orders` VALUES (3, 1, '2024-08-06 04:48:14');
-INSERT INTO `tr_orders` VALUES (4, 1, '2024-08-06 04:48:28');
-INSERT INTO `tr_orders` VALUES (5, 1, '2024-08-06 04:50:55');
-INSERT INTO `tr_orders` VALUES (6, 1, '2024-08-06 04:52:54');
-INSERT INTO `tr_orders` VALUES (7, 1, '2024-08-06 05:21:58');
-INSERT INTO `tr_orders` VALUES (8, 2, '2024-08-06 05:22:17');
-INSERT INTO `tr_orders` VALUES (15, 2, '2024-08-06 06:49:43');
-INSERT INTO `tr_orders` VALUES (16, 2, '2024-08-06 06:49:48');
-INSERT INTO `tr_orders` VALUES (17, 2, '2024-08-06 08:03:07');
+INSERT INTO `tr_orders` VALUES (1, 2, '2024-08-07 02:37:52');
 
 SET FOREIGN_KEY_CHECKS = 1;
